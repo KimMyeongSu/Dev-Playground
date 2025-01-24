@@ -1,17 +1,16 @@
 <script setup>
-import HelloWorld from './components/HelloWorld.vue'
+import compA from "remoteA/compA"
+import compB from "remoteB/compB"
+import compC from "remoteC/compC"
 </script>
 
 <template>
   <div>
-    <a href="https://vite.dev" target="_blank">
-      <img src="/vite.svg" class="logo" alt="Vite logo" />
-    </a>
-    <a href="https://vuejs.org/" target="_blank">
-      <img src="./assets/vue.svg" class="logo vue" alt="Vue logo" />
-    </a>
+    <h1>Host Project</h1>
+    <compA />
+    <compB />
+    <compC />
   </div>
-  <HelloWorld msg="Vite + Vue" />
 </template>
 
 <style scoped>
