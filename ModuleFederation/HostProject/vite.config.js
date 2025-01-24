@@ -15,4 +15,10 @@ export default defineConfig({
       shared: ["vue"],
     }),
   ],
+  build: {
+    modulePreload: false,
+    target: "esnext",
+    minify: false,
+    cssCodeSplit: false,
+  },
 })
