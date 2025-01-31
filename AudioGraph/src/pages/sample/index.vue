@@ -5,10 +5,12 @@ import audio from "@/assets/audio/C050_C_03.wav"
 
 const wavesurfer = ref(null)
 const recordedWaveSurfer = ref(null)
-const combinedWaveSurfer = ref(null)
+const resultWaveSurfer = ref(null)
+
 const isPlaying = ref(false)
 const isPlayingRecorded = ref(false)
-const isPlayingCombined = ref(false)
+const isPlayingResult = ref(false)
+
 const isRecording = ref(false)
 const mediaRecorder = ref(null)
 const recordedChunks = ref([])
@@ -26,27 +28,11 @@ onMounted(() => {
 
   // 녹음된 오디오를 위한 웨이브폼
   recordedWaveSurfer.value = WaveSurfer.create({
-    container: "#waveform",
+    container: "#recorded-waveform",
     waveColor: "rgba(0, 200, 0, 0.5)",
     progressColor: "rgba(0, 100, 0, 0.5)",
     height: 100,
     normalize: true,
-  })
-
-  // 비교를 위한 컨테이너 설정
-  const compareContainer = document.querySelector("#compare-waveform")
-  compareContainer.style.position = "relative"
-  compareContainer.style.height = "100px"
-
-  // 원본 파형 (보라색)
-  const originalCompare = WaveSurfer.create({
-    container: compareContainer,
-    waveColor: "rgba(200, 0, 200, 0.7)",
-    progressColor: "rgb(100, 0, 100)",
-    url: audio,
-    height: 100,
-    normalize: true,
-    interact: false, // 상호작용 비활성화
   })
 
   navigator.mediaDevices.getUserMedia({ audio: true }).then((stream) => {
@@ -62,19 +48,49 @@ onMounted(() => {
       const blob = new Blob(recordedChunks.value, { type: "audio/wav" })
       const audioUrl = URL.createObjectURL(blob)
 
-      // 녹음된 오디오 로드
+      // 녹음된 오디오를 recordedWaveSurfer에 로드
       await recordedWaveSurfer.value.load(audioUrl)
 
-      // 비교 파형에 녹음된 파형 추가 (녹색)
-      const recordedCompare = WaveSurfer.create({
-        container: compareContainer,
-        waveColor: "rgba(0, 200, 0, 0.7)",
-        progressColor: "rgba(0, 100, 0, 0.5)",
+      // 결과 화면의 이전 웨이브폼들 제거
+      if (resultWaveSurfer.value) {
+        resultWaveSurfer.value.destroy()
+      }
+
+      const resultContainer = document.querySelector("#result-waveform")
+      resultContainer.innerHTML = '<div class="original-wave"></div><div class="recorded-wave"></div>'
+
+      // 원본 파형 생성
+      resultWaveSurfer.value = WaveSurfer.create({
+        container: "#result-waveform .original-wave",
+        waveColor: "rgb(200, 0, 200)",
+        progressColor: "rgb(100, 0, 100)",
         height: 100,
         normalize: true,
-        interact: false, // 상호작용 비활성화
       })
-      await recordedCompare.load(audioUrl)
+
+      // 녹음된 파형 생성
+      const resultRecorded = WaveSurfer.create({
+        container: "#result-waveform .recorded-wave",
+        waveColor: "rgba(0, 200, 0, 0.3)",
+        progressColor: "rgba(0, 100, 0, 0.3)",
+        height: 100,
+        normalize: true,
+      })
+
+      // 오디오 로드
+      await resultWaveSurfer.value.load(audio)
+      await resultRecorded.load(audioUrl)
+
+      // 동기화를 위한 이벤트 리스너
+      resultWaveSurfer.value.on("play", () => {
+        isPlayingResult.value = true
+        resultRecorded.play()
+      })
+
+      resultWaveSurfer.value.on("pause", () => {
+        isPlayingResult.value = false
+        resultRecorded.pause()
+      })
     }
   })
 
@@ -93,14 +109,6 @@ onMounted(() => {
   recordedWaveSurfer.value.on("pause", () => {
     isPlayingRecorded.value = false
   })
-
-  combinedWaveSurfer.value.on("play", () => {
-    isPlayingCombined.value = true
-  })
-
-  combinedWaveSurfer.value.on("pause", () => {
-    isPlayingCombined.value = false
-  })
 })
 
 // 원본 오디오 재생/일시정지
@@ -113,9 +121,11 @@ const togglePlayRecorded = () => {
   recordedWaveSurfer.value.playPause()
 }
 
-// 합쳐진 파형 재생/일시정지 - 원본 오디오만 재생
-const togglePlayCombined = () => {
-  combinedWaveSurfer.value.playPause()
+// 결과 화면 재생/일시정지 토글 함수
+const togglePlayResult = () => {
+  if (resultWaveSurfer.value) {
+    resultWaveSurfer.value.playPause()
+  }
 }
 
 const startRecording = () => {
@@ -132,11 +142,17 @@ const stopRecording = () => {
 
 <template>
   <div class="audio-player">
-    <h3>원본 & 녹음 파형 (개별 재생 가능)</h3>
+    <h3>원본 파형</h3>
     <div id="waveform"></div>
 
-    <h3>파형 비교</h3>
-    <div id="compare-waveform"></div>
+    <div>
+      <h3>녹음된 파형</h3>
+      <div id="recorded-waveform"></div>
+    </div>
+    <div>
+      <h3>파형 비교</h3>
+      <div id="result-waveform"></div>
+    </div>
 
     <div class="controls">
       <button @click="togglePlay">
@@ -148,6 +164,9 @@ const stopRecording = () => {
       <button @click="isRecording ? stopRecording() : startRecording()" :class="{ recording: isRecording }">
         {{ isRecording ? "녹음 중지" : "녹음 시작" }}
       </button>
+      <button v-if="resultWaveSurfer" @click="togglePlayResult" :class="{ playing: isPlayingResult }">
+        {{ isPlayingResult ? "비교 일시정지" : "비교 재생" }}
+      </button>
     </div>
   </div>
 </template>
@@ -158,6 +177,7 @@ const stopRecording = () => {
   max-width: 800px;
   margin: 20px auto;
   padding: 20px;
+  position: relative;
 }
 
 h3 {
@@ -166,16 +186,38 @@ h3 {
 }
 
 #waveform,
-#combined-waveform {
+#recorded-waveform,
+#result-waveform {
   margin-bottom: 20px;
   background: #f5f5f5;
   border-radius: 4px;
   padding: 10px;
+  min-height: 120px;
+}
+
+#result-waveform {
+  position: relative;
+}
+
+.original-wave,
+.recorded-wave {
+  position: absolute !important;
+  top: 10px !important;
+  left: 10px !important;
+  right: 10px !important;
+  bottom: 10px !important;
+  pointer-events: none;
+}
+
+.recorded-wave {
+  z-index: 2;
 }
 
 .controls {
   margin-top: 20px;
   text-align: center;
+  position: relative;
+  z-index: 2;
 }
 
 button {
@@ -196,18 +238,7 @@ button:hover {
   background-color: #44ff44 !important;
 }
 
-#combined-waveform {
-  position: relative;
-  background: #f5f5f5;
-  border-radius: 4px;
-  padding: 10px;
-  margin-bottom: 20px;
-}
-
-#combined-waveform > wave {
-  position: absolute !important;
-  top: 10px !important;
-  left: 0 !important;
-  pointer-events: none;
+.recording {
+  background-color: #ff4444 !important;
 }
 </style>
