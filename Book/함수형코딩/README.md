@@ -98,5 +98,279 @@ function multiplier(factor) {
 
 const double = multiplier(2)
 const triple = multiplier(3)
-...
+```
+
+### 핵심 함수형 패턴
+
+#### 함수 합성(Function Composition)
+
+- 작은 함수들을 연결하여 복잡한 함수 만들기
+
+```javascript
+// 함수 합성
+function compose(f, g) {
+  return function (x) {
+    return f(g(x))
+  }
+}
+
+const addThenDouble = compose(
+  (x) => x * 2,
+  (x) => x + 1
+)
+// addThenDouble(3) = (3+1)*2 = 8
+```
+
+#### 주요 배열 고차 함수
+
+```javascript
+// map: 각 요소를 변환
+const doubled = [1, 2, 3].map((x) => x * 2) // [2, 4, 6]
+
+// filter: 조건에 맞는 요소만 선택
+const evens = [1, 2, 3, 4].filter((x) => x % 2 === 0) // [2, 4]
+
+// reduce: 값을 누적
+const sum = [1, 2, 3].reduce((acc, x) => acc + x, 0) // 6
+```
+
+### 함수형 프로그래밍 실천 전략
+
+- **작은 함수 작성**: 한 가지 작업만 수행
+- **함수 합성 활용**: 작은 함수들로 복잡한 로직 구현
+- **불변 데이터 사용**: 데이터 복사 후 새 데이터 반환
+- **부수 효과 제한**: 순수/비순수 함수 구분
+- **선언적 코드 작성**: '무엇을' 중심으로 표현
+
+### 팁
+
+- 먼저 명령형으로 작성한 후 함수형으로 리팩토링하기
+- 모든 코드를 함수형으로 바꾸려 하지 말고 점진적 적용
+- 복잡한 상태 관리에는 불변 데이터 구조 라이브러리 활용
+- 디버깅 시 중간 값을 확인할 수 있는 디버깅용 함수 작성
+
+```javascript
+// 디버깅용 함수 예시
+const trace = (label) => (value) => {
+  console.log(`${label}: ${value}`)
+  return value
+}
+
+// 사용 예시
+const result = [1, 2, 3]
+  .map((x) => x * 2)
+  .filter(trace("after doubling")) // 로그 출력
+  .reduce((sum, x) => sum + x, 0)
+```
+
+## 추가 내용 정리: 일급 함수의 개념과 의미
+
+### "일급(First-class)"의 기원
+
+"일급(First-class)"이라는 용어는 1960년대 영국의 컴퓨터 과학자 크리스토퍼 스트래치(Christopher Strachey)가 프로그래밍 언어 요소를 분류하기 위해 처음 도입했습니다. 이 용어는 사회에서의 "일급 시민(First-class citizen)"이라는 개념에서 차용되었으며, 프로그래밍 언어 내에서 완전한 권리와 특권을 가진 요소를 의미합니다.
+
+### 일급의 의미와 조건
+
+프로그래밍에서 어떤 요소가 "일급"이라는 말은 해당 요소가 다음과 같은 특권을 가진다는 의미입니다:
+
+1. **변수에 할당할 수 있다**
+2. **데이터 구조(배열, 객체 등)에 저장할 수 있다**
+3. **함수의 매개변수로 전달할 수 있다**
+4. **함수의 반환값으로 사용할 수 있다**
+5. **런타임에 동적으로 생성할 수 있다**
+
+이러한 특권은 해당 요소가 언어 내에서 다른 기본 데이터 타입(숫자, 문자열 등)과 동등한 지위를 가짐을 의미합니다.
+
+### 일급 함수와 함수형 프로그래밍
+
+일급 함수는 함수형 프로그래밍을 가능하게 하는 핵심 요소입니다:
+
+#### 1. 추상화 강화
+
+함수를 값으로 다룰 수 있어 높은 수준의 추상화가 가능해집니다.
+
+```javascript
+// 배열 처리의 추상화
+function processArray(arr, operation) {
+  const result = []
+  for (let i = 0; i < arr.length; i++) {
+    result.push(operation(arr[i]))
+  }
+  return result
+}
+
+// 다양한 연산에 재사용 가능
+const numbers = [1, 2, 3, 4]
+const doubled = processArray(numbers, (x) => x * 2)
+const squared = processArray(numbers, (x) => x * x)
+```
+
+#### 2. 고차 함수(Higher-order Functions)
+
+함수를 인자로 받거나 함수를 반환하는 함수를 만들 수 있습니다.
+
+```javascript
+// 함수 합성
+function compose(f, g) {
+  return function (x) {
+    return f(g(x))
+  }
+}
+
+const addThenDouble = compose(
+  (x) => x * 2, // 2배 함수
+  (x) => x + 1 // 더하기 1 함수
+)
+
+console.log(addThenDouble(3)) // (3+1)*2 = 8
+```
+
+#### 3. 클로저(Closure)
+
+함수가 자신의 렉시컬 환경을 기억하는 메커니즘을 활용할 수 있습니다.
+
+```javascript
+function counter() {
+  let count = 0
+
+  return function () {
+    count++
+    return count
+  }
+}
+
+const increment = counter()
+console.log(increment()) // 1
+console.log(increment()) // 2
+```
+
+### 일급 vs 이급(Second-class)
+
+일급 요소와 대조적으로, "이급(Second-class)" 요소는 언어 내에서 제한된 방식으로만 사용할 수 있습니다. 예를 들어, 일부 언어에서는:
+
+- 함수를 변수에 할당할 수 없음
+- 함수를 다른 함수의 인자로 전달할 수 없음
+- 함수를 반환값으로 사용할 수 없음
+
+초기 프로그래밍 언어들(예: 초기 FORTRAN, 초기 C)에서는 함수가 이급 지위를 가졌습니다.
+
+### 현대 언어에서의 일급 함수
+
+오늘날 대부분의 현대 프로그래밍 언어는 함수를 일급으로 취급합니다:
+
+- **JavaScript**: 함수는 완전한 일급 객체
+- **Python**: 함수는 일급 객체로 취급
+- **Ruby**: 블록과 프록 객체를 통한 일급 함수
+- **Swift/Kotlin**: 함수와 클로저를 일급으로 취급
+- **Haskell/ML**: 순수 함수형 언어로 함수가 일급
+
+## 순수 함수에 대한 추가 설명
+
+### 순수 함수의 상세 특성
+
+- **결정적(Deterministic)**: 실행 시간이나 횟수에 관계없이 항상 동일한 결과를 생성합니다.
+- **자족적(Self-contained)**: 함수 외부의 어떤 상태나 데이터에도 의존하지 않습니다.
+- **참조 투명성(Referential Transparency)**: 함수 호출을 그 결과값으로 대체해도 프로그램의 동작이 변하지 않습니다.
+
+### 순수 함수 vs 비순수 함수 예제
+
+**순수 함수 예제**:
+
+```javascript
+// 순수 함수: 입력에만 의존하고 외부 상태를 변경하지 않음
+function add(a, b) {
+  return a + b
+}
+
+// 순수 함수: 새 배열을 반환하고 원본 배열을 수정하지 않음
+function doubleArray(arr) {
+  return arr.map((item) => item * 2)
+}
+```
+
+**비순수 함수 예제**:
+
+```javascript
+// 비순수 함수: 외부 변수에 의존
+let tax = 0.1
+function calculateTotal(price) {
+  return price + price * tax // 외부 변수 tax에 의존
+}
+
+// 비순수 함수: 외부 상태 변경
+let counter = 0
+function increment() {
+  counter++ // 외부 변수 수정
+  return counter
+}
+
+// 비순수 함수: 원본 배열 수정
+function addToArray(arr, item) {
+  arr.push(item) // 원본 배열 수정
+  return arr
+}
+```
+
+### 순수 함수의 추가 장점
+
+1. **캐싱 가능(Memoization)**: 같은 입력에 대한 결과를 캐싱하여 성능을 개선할 수 있습니다.
+2. **참조 투명성**: 함수 호출을 결과값으로 대체해도 프로그램의 동작이 변하지 않습니다.
+3. **함수 합성의 용이성**: 순수 함수는 합성하기 쉽고 예측 가능합니다.
+
+### 현실에서의 순수 함수 적용
+
+완전히 순수한 프로그램을 만드는 것은 현실적으로 불가능합니다(입출력, 네트워크 통신 등이 필요하기 때문). 그러나 함수형 프로그래밍에서는:
+
+1. **코어 로직을 순수 함수로 구현**: 비즈니스 로직은 최대한 순수 함수로 작성
+2. **부수 효과 격리**: 불가피한 부수 효과(I/O, DB 접근 등)는 프로그램의 가장자리로 밀어냄
+3. **계층 분리**: 순수한 계층과 비순수한 계층을 명확히 분리
+
+### 순수 함수로의 리팩토링 예제
+
+**비순수 함수**:
+
+```javascript
+let users = []
+
+function addUser(name, age) {
+  if (name && age >= 18) {
+    users.push({ name, age })
+    console.log(`User ${name} added`)
+    return true
+  }
+  return false
+}
+```
+
+**순수 함수로 리팩토링**:
+
+```javascript
+// 순수 함수: 새 배열을 반환하고 검증 로직 포함
+function addUser(users, name, age) {
+  if (!name || age < 18) {
+    return { success: false, users }
+  }
+
+  // 새 배열을 생성하여 원본 변경 방지
+  const newUsers = [...users, { name, age }]
+
+  return {
+    success: true,
+    users: newUsers,
+  }
+}
+
+// 비순수 함수(부수 효과)는 별도로 분리
+function logUserAdded(name) {
+  console.log(`User ${name} added`)
+}
+
+// 사용 예:
+let users = []
+const result = addUser(users, "Alice", 25)
+
+if (result.success) {
+  users = result.users // 상태 업데이트
+  logUserAdded("Alice") // 로깅 부수 효과 별도 처리
+}
 ```
