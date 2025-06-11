@@ -1,0 +1,122 @@
+@import url(./tailwind.css);
+@import url("https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css");
+
+html,
+body,
+header,
+article,
+div,
+p,
+span,
+ul,
+li,
+img,
+input,
+label,
+textarea,
+select,
+option,
+table,
+thead,
+tbody,
+tr,
+td,
+a {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  outline: 0;
+  box-sizing: border-box;
+  color: #111111;
+  line-height: normal;
+}
+
+html,
+body {
+  font-family: "Pretendard", "Malgun Gothic", "맑은고딕", sans-serif;
+  box-sizing: border-box;
+  word-break: keep-all;
+  -webkit-text-size-adjust: 100%;
+  -webkit-tap-highlight-color: transparent;
+}
+
+header,
+article {
+  display: block;
+}
+
+li {
+  list-style: none;
+}
+
+input,
+label,
+select,
+textarea,
+a {
+  display: block;
+  width: 100%;
+}
+
+img {
+  display: block;
+  width: 100%;
+  -webkit-user-drag: none;
+  -khtml-user-drag: none;
+  -moz-user-drag: none;
+  -o-user-drag: none;
+}
+
+textarea {
+  resize: none;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  border-spacing: 0;
+}
+
+select {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  background-image: url(@/assets/img/footer/select-arrow.png);
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  background-size: 10px;
+
+  &::-ms-expand {
+    display: none;
+  }
+}
+
+.text-drag-none {
+  user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+}
+
+/* 배너 체크박스 */
+.check-label-b .checkmark {
+  background: url(@/assets/img/common/check-b-off.png) no-repeat center / cover;
+}
+.check-label-b input:checked ~ .checkmark {
+  background: url(@/assets/img/common/check-b-on.png) no-repeat center / cover;
+}
+
+/* 원형 체크박스1 */
+.check-label-c .checkmark {
+  background: url(@/assets/img/common/check-c-off.png) no-repeat center / cover;
+}
+.check-label-c input:checked ~ .checkmark {
+  background: url(@/assets/img/common/check-c-on.png) no-repeat center / cover;
+}
+
+/* 원형 체크박스2 */
+.check-label-c2 .checkmark {
+  background: url(@/assets/img/common/check-c-off2.png) no-repeat center / cover;
+}
+.check-label-c2 input:checked ~ .checkmark {
+  background: url(@/assets/img/common/check-c-on.png) no-repeat center / cover;
+}
